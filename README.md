@@ -1,6 +1,6 @@
 # Twitter_Bot-Reddit_API
 
-Twitter Bot that tweets top posts from certain user-chosen subreddits
+Twitter Bot that tweets top picture posts from certain user-chosen subreddits
 
 Uses Twit: https://www.npmjs.com/package/twit
 
