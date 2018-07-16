@@ -25,7 +25,8 @@ function getPost() {
   }
 
   // Updates everytime the top post is changed
-  snooper.watcher.getListingWatcher('meirl', params)
+  const subreddit = ""; // Subreddit that you would like to get picutures from (Should be a picture related subreddit)
+  snooper.watcher.getListingWatcher(subreddit, params)
     .on('item', getImage)
     .on('error', console.error)
 }
