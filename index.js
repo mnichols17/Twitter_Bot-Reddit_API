@@ -3,7 +3,7 @@ console.log(`Twitter Bot is starting at ${date.getHours()}:${date.getMinutes()}`
 
 let Twit = require('twit');
 let Snooper = require('reddit-snooper');
-let config = require('./config');
+let config = require('./configTwit');
 let configReddit = require('./configReddit');
 let download = require('image-downloader');
 let fs = require('fs');
