@@ -14,60 +14,57 @@ const snooper = new Snooper(configReddit);
 // If counter is greater than 1 (in certain time frame) don't post tweet, less than 1 then let post ahead
 let counter = 0;
 
-getPost();
-setInterval(() => { counter = 0; }, (60000 * 50)) // Every 50 minutes
+getPost(); // Every 1 minute
 
 // Gets the top post from subreddit and sends the image url to getImage()
 function getPost() {
   const params = {
-    listing: 'top_hour', // Gets the posts from the "hot" index
-    limit: 1 // Gets only 1 post
+    listing: 'hot', // Gets the posts from the "hot" index
+    limit: 2 // Gets 5 posts
   }
 
   // Updates everytime the top post is changed
-  const subreddit = 'pics';
+  const subreddit = 'dankmemes';
   snooper.watcher.getListingWatcher(subreddit, params)
-    .on('item', getImage)
+    .on('item', (item) => getImage(item))
     .on('error', console.error)
 }
 
 // Saves the image from the url
 function getImage(item) {
   counter++;
-  let picUrl = (item.data.preview.images[0].source.url);
-  if(!picUrl.includes(".gif")) {
-    const options = {
-      url: picUrl,
-      dest: "Pictures/postingImage00.jpg"
+  if(item.data.pinned == false && item.data.stickied == false){
+    let picUrl = (item.data.url);
+    let title = (item.data.title);
+    if(!picUrl.includes(".gif")) {
+      const options = {
+        url: picUrl,
+        dest: "Pictures/postingImage00.jpg"
+      }
+      download.image(options)
+        .then(({filename, image}) => {
+          console.log(`Counter at ${counter}`);
+          console.log("File saved to " + filename);
+          postPicture(title);
+        })
+        .catch((err) => { console.log(err); })
+    } else {
+      console.log("Image was a .gif and was skipped");
     }
-
-    download.image(options)
-      .then(({filename, image}) => {
-        console.log(`Counter at ${counter}`);
-        console.log("File saved to " + filename);
-        if(counter <= 1){
-          postPicture();
-        }
-      })
-      .catch((err) => { console.log(err); })
-  } else {
-    console.log("Image was a .gif and was skipped");
   }
 }
 
-// Gets the picutre that was saved in getImage() and tweets it out with
-function postPicture() {
+//Gets the picutre that was saved in getImage() and tweets it out with
+function postPicture(title) {
   const b64content = fs.readFileSync("Pictures/postingImage00.jpg", { encoding: 'base64'});
-  const random = Math.floor(Math.random() * 500);
-
   T.post('media/upload', { media_data: b64content }, function (err, data, response) {
     let mediaIdStr = data.media_id_string;
-    let altText = `picture num ${random}`;
+    let altText = `picture num ${title}`;
     let meta_params = { media_id: mediaIdStr, alt_text: { text: altText } }
 
     T.post('media/metadata/create', meta_params, function (err, data, response) {
       if (!err) {
-        let params = { status: `${random}`, media_ids: [mediaIdStr] } // Status is the tweet's text
+        let params = { status: `${title}`, media_ids: [mediaIdStr] } // Status is the tweet's text
 
         T.post('statuses/update', params, function (err, data, response) {
           const d2 = new Date();
